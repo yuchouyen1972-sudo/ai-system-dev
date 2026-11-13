@@ -1,6 +1,6 @@
 """
 微型台指 TMF 決策引擎骨架 - NT$75,000 專用
-規格: 乘數 10元/點, 1跳1點=10元, 原始保證金16100, 維持12350 (依期交所公告為準)
+規格: 乘數 10元/點, 1跳1點=10元, 原始保證金35050, 維持26900 (依期交所公告為準，2026/08/12更新)
 原則: 單筆風險1% + MC Dropout 不確定性過濾 + 日/週熔斷
 """
 
@@ -16,8 +16,8 @@ class TMFSpec:
     multiplier: int = 10  # 10元/點
     tick_point: int = 1  # 最小升降1點
     tick_value: int = 10  # 1點=10元
-    original_margin: int = 16100  # 原始保證金 (113/9/27後)
-    maintenance_margin: int = 12350
+    original_margin: int = 35050  # 原始保證金 (依期交所公告 2026/08/12)
+    maintenance_margin: int = 26900  # 維持保證金 (依期交所公告 2026/08/12)
     tax_rate: float = 0.00002  # 期交稅 2/100000
     commission_per_side: int = 35  # 依期貨商, 單邊35元為例
     min_stop_points: int = 40

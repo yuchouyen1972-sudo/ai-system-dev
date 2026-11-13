@@ -28,7 +28,7 @@ def test_valid_normal_params():
 def test_margin_insufficient():
     """FR-003: 權益小於 1.5 倍原始保證金應 valid=False."""
     spec, account = _normal_spec_account()
-    account.equity = 10000  # 小於 16100 * 1.5 = 24150
+    account.equity = 10000  # 小於 35050 * 1.5 = 52575
     result = validate_config(spec, account)
     assert result["valid"] is False
     assert any("margin" in e.lower() for e in result["errors"])

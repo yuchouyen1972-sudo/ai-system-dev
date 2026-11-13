@@ -21,7 +21,7 @@ TMFDecisionEngine 初始化時，自動檢查 TMFSpec 與 Account 參數是否�
 
 **Acceptance Scenarios**:
 
-1. **Given** TMFSpec(original_margin=16100), Account(equity=75000), **When** TMFDecisionEngine 初始化， **Then** 驗證通過，valid=True，無錯誤。
+1. **Given** TMFSpec(original_margin=35050), Account(equity=75000), **When** TMFDecisionEngine 初始化， **Then** 驗證通過，valid=True，無錯誤。
 2. **Given** Account(equity=10000) 小於 1.5 倍原始保證金 24150， **When** 初始化， **Then** valid=False，errors 包含保證金不足。
 3. **Given** TMFSpec(min_stop_points=40, max_stop_points=80), **When** 呼叫驗證檢查停損範圍， **Then** 若 min > max 則回傳錯誤。
 
