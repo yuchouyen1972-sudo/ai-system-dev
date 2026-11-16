@@ -1,0 +1,199 @@
+name: api-recon
+display_name:
+  en: API Reconnaissance
+  zh: API 接口偵察
+  ko: API 정찰
+  es: Reconocimiento de API
+  ja: API 偵察
+description:
+  en: Discover backend APIs, frontend routes, and UI trigger points through static and runtime analysis
+  zh: 通過靜態與運行時分析發現後端 API、前端路由與 UI 觸發點
+  ko: 정적 및 런타임 분석을 통해 백엔드 API, 프론트엔드 라우트, UI 트리거 포인트 발견
+  es: Descubra APIs de backend, rutas de frontend y puntos de activación UI mediante análisis estático y en tiempo de ejecución
+  ja: 静的およびランタイム分析によりバックエンドAPI、フロントエンドルート、UIトリガーポイントを発見
+version: "1.2.0"
+category: recon
+author: ARTEX Team
+license: MIT
+tags:
+  - api
+  - recon
+  - spa
+  - mpa
+  - javascript
+  - static-analysis
+  - runtime-analysis
+compatibility:
+  min_artex_version: "0.3.0"
+  platforms:
+    - linux
+    - darwin
+    - windows
+  architectures:
+    - amd64
+    - arm64
+dependencies:
+  system:
+    - name: python3
+      version: "3.9+"
+      check_command: "python3 --version"
+    - name: node
+      version: "18+"
+      check_command: "node --version"
+    - name: npm
+      check_command: "npm --version"
+  python:
+    - package: requests
+    - package: beautifulsoup4
+    - package: lxml
+  node:
+    - package: puppeteer
+      version: "21+"
+allowed_tools:
+  - "Bash(python3:*)"
+  - "Bash(node:*)"
+  - "Bash(npm:*)"
+  - "Bash(curl:*)"
+parameters:
+  - name: target_url
+    type: string
+    label:
+      en: Target URL
+      zh: 目標 URL
+    description:
+      en: The base URL of the target application
+      zh: 目標應用的基礎 URL
+    required: true
+    validation:
+      pattern: "^https?://.+"
+  - name: runtime_mode
+    type: string
+    label:
+      en: Runtime Mode
+      zh: 運行模式
+    description:
+      en: Analysis mode (depth, coverage, or both)
+      zh: 分析模式
+    required: false
+    default: "both"
+    enum:
+      - value: "depth"
+        label:
+          en: Depth (Puppeteer)
+          zh: 深度 (Puppeteer)
+      - value: "coverage"
+        label:
+          en: Coverage (Browser + Preload)
+          zh: 覆蓋率 (瀏覽器 + Preload)
+      - value: "both"
+        label:
+          en: Both (Depth then Coverage)
+          zh: 兩者 (先深度後覆蓋)
+  - name: outdir
+    type: string
+    label:
+      en: Output Directory
+      zh: 輸出目錄
+    description:
+      en: Directory to store reconnaissance results
+      zh: 存放偵察結果的目錄
+    required: false
+    default: "recon"
+  - name: cookie
+    type: string
+    label:
+      en: Session Cookie
+      zh: 會話 Cookie
+    description:
+      en: Optional session cookie for authenticated areas
+      zh: 可選的會話 Cookie，用於已認證區域
+    required: false
+    secret: true
+  - name: max_depth
+    type: number
+    label:
+      en: Max Crawl Depth
+      zh: 最大爬取深度
+    description:
+      en: Maximum depth for MPA spidering
+      zh: MPA 爬蟲的最大深度
+    required: false
+    default: 5
+    validation:
+      min: 1
+      max: 20
+  - name: exclude_patterns
+    type: string
+    label:
+      en: Exclude Patterns
+      zh: 排除模式
+    description:
+      en: Regex patterns to exclude from crawling (e.g., logout|delete)
+      zh: 爬取時排除的正則模式
+    required: false
+    default: "logout|delete|destroy|signout"
+entrypoint:
+  type: script
+  command: python3
+  args:
+    - scripts/harvest_static.py
+    - "{{.target_url}}"
+    - "{{.outdir}}"
+  working_dir: "."
+  env:
+    PYTHONPATH: "scripts"
+outputs:
+  - name: api_static
+    type: file
+    description: Static API endpoints discovered
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          path:
+            type: string
+          method:
+            type: string
+          source:
+            type: string
+  - name: routes
+    type: file
+    description: Frontend routes discovered
+  - name: params_merged
+    type: json
+    description: Merged parameter definitions with confidence
+  - name: site_map
+    type: json
+    description: Complete site map with routes, APIs, params, features
+examples:
+  - name: Basic SPA Recon
+    description: Full reconnaissance on a SPA application
+    parameters:
+      target_url: "https://app.example.com"
+      runtime_mode: "both"
+      outdir: "recon_example"
+  - name: MPA with Auth
+    description: MPA reconnaissance with session cookie
+    parameters:
+      target_url: "https://portal.example.com"
+      runtime_mode: "depth"
+      cookie: "session=abc123; csrf=xyz789"
+      exclude_patterns: "logout|delete|admin"
+documentation:
+  readme: "README.md"
+  changelog: "CHANGELOG.md"
+maintainers:
+  - name: ARTEX Team
+    github: "jiwoochris/artex-global"
+status: stable
+permissions:
+  network: true
+  filesystem:
+    read: ["."]
+    write: ["recon/", "OUTDIR/"]
+  process: true
+  privileged: false
+hooks:
+  pre_run: "scripts/pre_run_check.py"
+  post_run: "scripts/post_run_report.py"

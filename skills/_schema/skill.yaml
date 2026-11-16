@@ -1,0 +1,159 @@
+# Skill 定義 Schema (v1)
+# 用於 ARTEX Web UI 的技能管理系統
+# 
+# 放置位置: skills/<skill-name>/skill.yaml
+# 自動掃描: 後端啟動時遞迴掃描 skills/ 目錄
+
+# ============================================
+# 必填欄位
+# ============================================
+name: string                    # 技能唯一識別符 (kebab-case, 唯一)
+display_name: string            # 顯示名稱 (多語言支援見 i18n)
+description: string             # 一句話說明
+version: string                 # 語義化版本 (semver)
+category: string                # 分類: recon | exploit | post-exploit | utility | custom
+author: string                  # 作者/維護者
+license: string                 # 授權 (MIT, Apache-2.0, etc.)
+
+# ============================================
+# 可選欄位
+# ============================================
+tags:                           # 標籤 (用於搜尋/過濾)
+  - string
+
+# 多語言顯示名稱
+i18n:
+  display_name:
+    en: string
+    zh: string
+    ko: string
+    es: string
+    ja: string
+  description:
+    en: string
+    zh: string
+    ko: string
+    es: string
+    ja: string
+
+# 相容性
+compatibility:
+  min_artex_version: string     # 最低 ARTEX 版本
+  max_artex_version: string     # 最高相容版本 (可選)
+  platforms:                    # 支援平台
+    - linux
+    - windows
+    - darwin
+  architectures:
+    - amd64
+    - arm64
+
+# 依賴
+dependencies:
+  system:                       # 系統級依賴 (檢查是否安裝)
+    - name: string              # 如: python3, node, nmap
+      version: string           # 最低版本 (可選)
+      check_command: string     # 檢查命令 (可選)
+  python:                       # Python 套件
+    - package: string
+      version: string           # 可選
+  node:                         # Node.js 套件
+    - package: string
+      version: string
+  go:                           # Go 模組
+    - module: string
+      version: string
+
+# 允許的工具 (對應 ARTEX 的 allowed-tools)
+allowed_tools:
+  - string                      # 如: Bash(python:*), Bash(nmap:*), Bash(curl:*)
+
+# 配置參數定義 (供 UI 表單生成)
+parameters:
+  - name: string                # 參數名
+    type: string                # string | number | boolean | array | object | file | secret
+    label:                      # 顯示標籤 (多語言)
+      en: string
+      zh: string
+    description: string         # 說明
+    required: boolean           # 是否必填
+    default: any                # 預設值
+    enum:                       # 選項 (僅 type: string)
+      - value: string
+        label:
+          en: string
+          zh: string
+    validation:                 # 驗證規則
+      pattern: string           # regex
+      min: number
+      max: number
+      min_length: number
+      max_length: number
+    secret: boolean             # 是否敏感資訊 (API Key 等)
+
+# 入口點
+entrypoint:
+  type: string                  # script | binary | docker | mcp
+  command: string               # 執行命令 (相對於 skill 目錄)
+  args:                         # 固定參數
+    - string
+  env:                          # 環境變數
+    KEY: string
+  working_dir: string           # 工作目錄 (相對/絕對)
+
+# 輸出定義
+outputs:
+  - name: string
+    type: string                # json | text | file | asset | finding
+    description: string
+    schema: object              # JSON Schema (可選)
+
+# 範例用法
+examples:
+  - name: string
+    description: string
+    parameters:                 # 範例參數值
+      key: value
+
+# 文檔連結
+documentation:
+  readme: string                # 相對路徑 (如: README.md)
+  wiki: string                  # 外部 Wiki URL
+  changelog: string             # 變更日誌路徑
+
+# 維護資訊
+maintainers:
+  - name: string
+    email: string
+    github: string
+
+# 狀態
+status: string                  # stable | beta | alpha | deprecated | archived
+deprecated_since: string        # 棄用版本 (若 status=deprecated)
+replacement: string             # 替代技能名 (若棄用)
+
+# 測試
+test:
+  command: string               # 測試命令
+  timeout: number               # 超時秒數 (預設 300)
+  fixtures:                     # 測試夾具
+    - name: string
+      input: object
+      expected_output: object
+
+# 生命週期鉤子
+hooks:
+  pre_install: string           # 安裝前腳本
+  post_install: string          # 安裝後腳本
+  pre_run: string               # 執行前腳本
+  post_run: string              # 執行後腳本
+  on_error: string              # 錯誤處理腳本
+
+# 權限
+permissions:
+  network: boolean              # 需要網路存取
+  filesystem:                   # 檔案系統存取
+    read: string[]              # 可讀路徑模式
+    write: string[]             # 可寫路徑模式
+  process: boolean              # 生成子進程
+  privileged: boolean           # 需提權

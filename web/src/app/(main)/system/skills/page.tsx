@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 
 import {
   AlertTriangleIcon,
@@ -10,6 +11,7 @@ import {
   FolderIcon,
   FolderOpenIcon,
   FolderPlusIcon,
+  PlayIcon,
   PlusIcon,
   Trash2Icon,
   UploadIcon,
@@ -42,6 +44,7 @@ import { useAgentLabels } from "@/lib/agent-i18n";
 import { ApiError, api } from "@/lib/api";
 import type { Agent, MCPServer, MissingSkill, SkillCall, SkillItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { SkillYAMLDisplay } from "./SkillYAMLDisplay";
 
 function fmtTime(ts: string | undefined, never: string) {
   if (!ts) return never;
@@ -862,6 +865,12 @@ export default function SkillsPage() {
             </PopoverContent>
           </Popover>
         )}
+        <Link href="/system/kali" passHref legacyBehavior>
+          <Button size="sm" variant="outline" className="ml-auto">
+            <PlayIcon className="size-3.5" />
+            Kali Tools Directory
+          </Button>
+        </Link>
       </div>
       <div className="flex flex-1 overflow-hidden">
         {/* ── 左侧文件树 ── */}
@@ -1031,117 +1040,239 @@ export default function SkillsPage() {
                       {selectedSkill.compatibility}
                     </Badge>
                   )}
-                </div>
-              </div>
-
-              {/* 左右分栏：配置（MCP/可见性）在左为主，调用统计在右为辅。
-                  lg 以下放不下时用 flex-row-reverse 回落到单列——统计因 DOM 顺序在前，
-                  窄屏时自然落到配置上方（与改版前的上下顺序一致）。 */}
-              <div className="flex flex-col gap-6 lg:flex-row-reverse lg:items-start">
-                {/* ── 右侧：调用统计 ── */}
-                <div className="space-y-2 lg:w-80 lg:shrink-0">
-                  <Label className="text-xs text-muted-foreground">{t("callStats")}</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-md border p-2">
-                      <p className="text-lg font-semibold tabular-nums">{selectedSkill.calls}</p>
-                      <p className="text-xs text-muted-foreground">{t("totalCalls")}</p>
-                    </div>
-                    <div className="rounded-md border p-2">
-                      <p className="text-lg font-semibold tabular-nums">{selectedSkill.tasks}</p>
-                      <p className="text-xs text-muted-foreground">{t("coveredTasks")}</p>
-                    </div>
-                    <div className="rounded-md border p-2">
-                      <p
-                        className="truncate text-sm font-medium"
-                        title={fmtTime(selectedSkill.last_used, t("neverCalled"))}
-                      >
-                        {fmtTime(selectedSkill.last_used, t("neverCalled"))}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{t("recent")}</p>
-                    </div>
-                  </div>
-                  {selectedSkill.usage_agents.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-xs text-muted-foreground">{t("callers")}</span>
-                      {selectedSkill.usage_agents.map((k) => (
-                        <Badge key={k} variant="secondary" className="text-xs font-normal">
-                          {k}
+                  {selectedSkill.version && (
+                    <Badge variant="outline" className="text-xs font-normal">
+                      v{selectedSkill.version}
+                    </Badge>
+                  )}
+                  {selectedSkill.category && (
+                    <Badge variant="default" className="text-xs font-normal">
+                      {selectedSkill.category}
+                    </Badge>
+                  )}
+                  {selectedSkill.status && (
+                    <Badge 
+                      variant={selectedSkill.status === 'deprecated' ? 'destructive' : selectedSkill.status === 'beta' ? 'secondary' : 'outline'} 
+                      className="text-xs font-normal"
+                    >
+                      {selectedSkill.status}
+                    </Badge>
+                  )}
+                  {selectedSkill.tags && selectedSkill.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedSkill.tags.map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
                         </Badge>
                       ))}
                     </div>
                   )}
-                  {usageLoading ? (
-                    <p className="text-xs text-muted-foreground">{t("loadingCalls")}</p>
-                  ) : usageCalls.length > 0 ? (
-                    <div className="rounded-md border">
-                      <div className="border-b px-2 py-1 text-xs text-muted-foreground">
-                        {t("recentCallsCount", { count: usageCalls.length })}
+                </div>
+              </div>
+
+              {/* Skill Detail Tabs */}
+              <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
+                <TabsList className="shrink-0">
+                  <TabsTrigger value="overview">{t("tabOverview")}</TabsTrigger>
+                  <TabsTrigger value="yaml">
+                    {t("tabSkillYAML")}
+                    {selectedSkill.has_yaml && (
+                      <span className="ml-1.5 rounded-full bg-green-500 px-1.5 py-0.5 text-[10px] leading-none text-white">
+                        YAML
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="config">
+                    {t("tabConfig")}
+                  </TabsTrigger>
+                  <TabsTrigger value="calls">
+                    {t("tabCalls")}
+                    {usageCalls.length > 0 && (
+                      <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] leading-none text-primary-foreground">
+                        {usageCalls.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto data-[state=inactive]:hidden">
+                  {/* ── 调用统计 ── */}
+                  <div className="space-y-2 lg:w-80 lg:shrink-0">
+                    <Label className="text-xs text-muted-foreground">{t("callStats")}</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="rounded-md border p-2">
+                        <p className="text-lg font-semibold tabular-nums">{selectedSkill.calls}</p>
+                        <p className="text-xs text-muted-foreground">{t("totalCalls")}</p>
                       </div>
-                      <div className="max-h-56 overflow-y-auto">
-                        {usageCalls.map((c, i) => (
-                          <div
-                            key={`${c.ts}-${i}`}
-                            className="flex items-center gap-2 border-b px-2 py-1 text-xs last:border-b-0"
-                          >
-                            <span className="tabular-nums text-muted-foreground">
-                              {fmtTime(c.ts, t("neverCalled"))}
-                            </span>
-                            <Badge variant="outline" className="font-normal">
-                              {c.agent_key || "—"}
-                            </Badge>
-                            <span className="ml-auto text-muted-foreground">
-                              {c.task_id > 0 ? t("taskRef", { id: c.task_id }) : c.session_id ? t("sessionRef") : "—"}
-                            </span>
-                          </div>
-                        ))}
+                      <div className="rounded-md border p-2">
+                        <p className="text-lg font-semibold tabular-nums">{selectedSkill.tasks}</p>
+                        <p className="text-xs text-muted-foreground">{t("coveredTasks")}</p>
+                      </div>
+                      <div className="rounded-md border p-2">
+                        <p
+                          className="truncate text-sm font-medium"
+                          title={fmtTime(selectedSkill.last_used, t("neverCalled"))}
+                        >
+                          {fmtTime(selectedSkill.last_used, t("neverCalled"))}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{t("recent")}</p>
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">{t("noCallsYet")}</p>
-                  )}
-                </div>
-
-                {/* ── 左侧：关联 MCP + 可见性 ── */}
-                <div className="space-y-5 lg:min-w-0 lg:flex-1">
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">
-                      {t("linkedMcp")}
-                      <span className="ml-1 font-normal">{t("linkedMcpHint")}</span>
-                    </Label>
-                    {mcpOptions.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">{t("noMcp")}</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-x-4 gap-y-2">
-                        {mcpOptions.map((m) => (
-                          <label key={m.id} className="flex cursor-pointer items-center gap-2 text-sm">
-                            <Checkbox
-                              checked={detailMcps.includes(m.name)}
-                              onCheckedChange={(on) => toggleSkillMcp(selectedSkill.name, m.name, !!on)}
-                            />
-                            {m.name}
-                          </label>
+                    {selectedSkill.usage_agents.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className="text-xs text-muted-foreground">{t("callers")}</span>
+                        {selectedSkill.usage_agents.map((k) => (
+                          <Badge key={k} variant="secondary" className="text-xs font-normal">
+                            {k}
+                          </Badge>
                         ))}
                       </div>
                     )}
+                    {usageLoading ? (
+                      <p className="text-xs text-muted-foreground">{t("loadingCalls")}</p>
+                    ) : usageCalls.length > 0 ? (
+                      <div className="rounded-md border">
+                        <div className="border-b px-2 py-1 text-xs text-muted-foreground">
+                          {t("recentCallsCount", { count: usageCalls.length })}
+                        </div>
+                        <div className="max-h-56 overflow-y-auto">
+                          {usageCalls.map((c, i) => (
+                            <div
+                              key={`${c.ts}-${i}`}
+                              className="flex items-center gap-2 border-b px-2 py-1 text-xs last:border-b-0"
+                            >
+                              <span className="tabular-nums text-muted-foreground">
+                                {fmtTime(c.ts, t("neverCalled"))}
+                              </span>
+                              <Badge variant="outline" className="font-normal">
+                                {c.agent_key || "—"}
+                              </Badge>
+                              <span className="ml-auto text-muted-foreground">
+                                {c.task_id > 0 ? t("taskRef", { id: c.task_id }) : c.session_id ? t("sessionRef") : "—"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t("noCallsYet")}</p>
+                    )}
                   </div>
+                </TabsContent>
 
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">{t("visibility")}</Label>
+                {/* Skill YAML Tab */}
+                <TabsContent value="yaml" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto data-[state=inactive]:hidden">
+                  <SkillYAMLDisplay skill={selectedSkill} />
+                </TabsContent>
+
+                {/* Config Tab (MCP + Visibility) */}
+                <TabsContent value="config" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto data-[state=inactive]:hidden">
+                  <div className="space-y-5 lg:min-w-0 lg:flex-1">
                     <div className="space-y-2">
-                      {agents.map((a) => (
-                        <label key={a.key} className="flex cursor-pointer items-center gap-2 text-sm">
-                          <Checkbox
-                            checked={(visibility[selectedSkill.name] ?? []).includes(a.id)}
-                            onCheckedChange={() => toggleVisibility(selectedSkill.name, a.id, agentLabels.name(a))}
-                          />
-                          {agentLabels.name(a)}
-                        </label>
-                      ))}
-                      {agents.length === 0 && <span className="text-xs text-muted-foreground">{t("noAgents")}</span>}
+                      <Label className="text-xs text-muted-foreground">
+                        {t("linkedMcp")}
+                        <span className="ml-1 font-normal">{t("linkedMcpHint")}</span>
+                      </Label>
+                      {mcpOptions.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">{t("noMcp")}</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          {mcpOptions.map((m) => (
+                            <label key={m.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                              <Checkbox
+                                checked={detailMcps.includes(m.name)}
+                                onCheckedChange={(on) => toggleSkillMcp(selectedSkill.name, m.name, !!on)}
+                              />
+                              {m.name}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">{t("visibility")}</Label>
+                      <div className="space-y-2">
+                        {agents.map((a) => (
+                          <label key={a.key} className="flex cursor-pointer items-center gap-2 text-sm">
+                            <Checkbox
+                              checked={(visibility[selectedSkill.name] ?? []).includes(a.id)}
+                              onCheckedChange={() => toggleVisibility(selectedSkill.name, a.id, agentLabels.name(a))}
+                            />
+                            {agentLabels.name(a)}
+                          </label>
+                        ))}
+                        {agents.length === 0 && <span className="text-xs text-muted-foreground">{t("noAgents")}</span>}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                {/* Calls Tab */}
+                <TabsContent value="calls" className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto data-[state=inactive]:hidden">
+                  <div className="space-y-2 lg:w-80 lg:shrink-0">
+                    <Label className="text-xs text-muted-foreground">{t("callStats")}</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="rounded-md border p-2">
+                        <p className="text-lg font-semibold tabular-nums">{selectedSkill.calls}</p>
+                        <p className="text-xs text-muted-foreground">{t("totalCalls")}</p>
+                      </div>
+                      <div className="rounded-md border p-2">
+                        <p className="text-lg font-semibold tabular-nums">{selectedSkill.tasks}</p>
+                        <p className="text-xs text-muted-foreground">{t("coveredTasks")}</p>
+                      </div>
+                      <div className="rounded-md border p-2">
+                        <p
+                          className="truncate text-sm font-medium"
+                          title={fmtTime(selectedSkill.last_used, t("neverCalled"))}
+                        >
+                          {fmtTime(selectedSkill.last_used, t("neverCalled"))}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{t("recent")}</p>
+                      </div>
+                    </div>
+                    {selectedSkill.usage_agents.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className="text-xs text-muted-foreground">{t("callers")}</span>
+                        {selectedSkill.usage_agents.map((k) => (
+                          <Badge key={k} variant="secondary" className="text-xs font-normal">
+                            {k}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    {usageLoading ? (
+                      <p className="text-xs text-muted-foreground">{t("loadingCalls")}</p>
+                    ) : usageCalls.length > 0 ? (
+                      <div className="rounded-md border">
+                        <div className="border-b px-2 py-1 text-xs text-muted-foreground">
+                          {t("recentCallsCount", { count: usageCalls.length })}
+                        </div>
+                        <div className="max-h-56 overflow-y-auto">
+                          {usageCalls.map((c, i) => (
+                            <div
+                              key={`${c.ts}-${i}`}
+                              className="flex items-center gap-2 border-b px-2 py-1 text-xs last:border-b-0"
+                            >
+                              <span className="tabular-nums text-muted-foreground">
+                                {fmtTime(c.ts, t("neverCalled"))}
+                              </span>
+                              <Badge variant="outline" className="font-normal">
+                                {c.agent_key || "—"}
+                              </Badge>
+                              <span className="ml-auto text-muted-foreground">
+                                {c.task_id > 0 ? t("taskRef", { id: c.task_id }) : c.session_id ? t("sessionRef") : "—"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t("noCallsYet")}</p>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
 

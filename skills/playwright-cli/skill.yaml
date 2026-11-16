@@ -1,0 +1,228 @@
+name: playwright-cli
+display_name:
+  en: Playwright CLI
+  zh: Playwright 命令列工具
+  ko: Playwright CLI
+  es: Playwright CLI
+  ja: Playwright CLI
+description:
+  en: Browser automation, testing, and interaction using Playwright CLI
+  zh: 使用 Playwright CLI 進行瀏覽器自動化、測試與互動
+  ko: Playwright CLI를 사용한 브라우저 자동화, 테스트 및 상호작용
+  es: Automatización, pruebas e interacción del navegador usando Playwright CLI
+  ja: Playwright CLIを使用したブラウザ自動化、テスト、インタラクション
+version: "1.0.0"
+category: utility
+author: ARTEX Team
+license: MIT
+tags:
+  - browser
+  - automation
+  - testing
+  - playwright
+  - e2e
+  - snapshot
+compatibility:
+  min_artex_version: "0.3.0"
+  platforms:
+    - linux
+    - darwin
+    - windows
+  architectures:
+    - amd64
+    - arm64
+dependencies:
+  system:
+    - name: node
+      version: "18+"
+      check_command: "node --version"
+    - name: npx
+      check_command: "npx --version"
+  node:
+    - package: "@playwright/cli"
+      version: "latest"
+    - package: "playwright"
+      version: "latest"
+allowed_tools:
+  - "Bash(playwright-cli:*)"
+  - "Bash(npx:*)"
+  - "Bash(npm:*)"
+parameters:
+  - name: command
+    type: string
+    label:
+      en: Command
+      zh: 命令
+    description:
+      en: Playwright CLI command to execute
+      zh: 要執行的 Playwright CLI 命令
+    required: true
+    enum:
+      - value: "open"
+        label:
+          en: Open browser
+          zh: 開啟瀏覽器
+      - value: "goto"
+        label:
+          en: Navigate to URL
+          zh: 導航到 URL
+      - value: "click"
+        label:
+          en: Click element
+          zh: 點擊元素
+      - value: "fill"
+        label:
+          en: Fill input
+          zh: 填寫輸入框
+      - value: "snapshot"
+        label:
+          en: Take snapshot
+          zh: 獲取快照
+      - value: "close"
+        label:
+          en: Close browser
+          zh: 關閉瀏覽器
+      - value: "eval"
+        label:
+          en: Evaluate JavaScript
+          zh: 執行 JavaScript
+      - value: "screenshot"
+        label:
+          en: Take screenshot
+          zh: 截圖
+  - name: args
+    type: array
+    label:
+      en: Arguments
+      zh: 參數
+    description:
+      en: Command arguments
+      zh: 命令參數
+    required: false
+  - name: session
+    type: string
+    label:
+      en: Session Name
+      zh: 會話名稱
+    description:
+      en: Browser session name (for persistent sessions)
+      zh: 瀏覽器會話名稱 (用於持久化會話)
+    required: false
+    default: "default"
+  - name: browser
+    type: string
+    label:
+      en: Browser Type
+      zh: 瀏覽器類型
+    description:
+      en: Browser engine to use
+      zh: 使用的瀏覽器引擎
+    required: false
+    default: "chromium"
+    enum:
+      - value: "chromium"
+        label:
+          en: Chromium
+          zh: Chromium
+      - value: "firefox"
+        label:
+          en: Firefox
+          zh: Firefox
+      - value: "webkit"
+        label:
+          en: WebKit
+          zh: WebKit
+      - value: "msedge"
+        label:
+          en: Microsoft Edge
+          zh: Microsoft Edge
+  - name: persistent
+    type: boolean
+    label:
+      en: Persistent Profile
+      zh: 持久化配置
+    description:
+      en: Use persistent browser profile
+      zh: 使用持久化瀏覽器配置
+    required: false
+    default: false
+  - name: headless
+    type: boolean
+    label:
+      en: Headless Mode
+      zh: 無頭模式
+    description:
+      en: Run in headless mode
+      zh: 以無頭模式運行
+    required: false
+    default: true
+entrypoint:
+  type: script
+  command: npx
+  args:
+    - "--no-install"
+    - "playwright"
+    - "cli"
+    - "{{.command}}"
+    - "{{#each .args}}{{.}} {{/each}}"
+    - "{{#if .session}}-s={{.session}}{{/if}}"
+    - "{{#if .browser}}--browser={{.browser}}{{/if}}"
+    - "{{#if .persistent}}--persistent{{/if}}"
+    - "{{#if .headless}}--headless{{else}}--headed{{/if}}"
+  working_dir: "."
+outputs:
+  - name: snapshot
+    type: json
+    description: Page snapshot with refs
+  - name: screenshot
+    type: file
+    description: Screenshot image
+  - name: console
+    type: json
+    description: Console messages
+  - name: requests
+    type: json
+    description: Network requests
+examples:
+  - name: Basic Navigation
+    description: Open a page and take snapshot
+    parameters:
+      command: "goto"
+      args:
+        - "https://example.com"
+      - command: "snapshot"
+  - name: Form Submission
+    description: Fill and submit a form
+    parameters:
+      command: "open"
+      args:
+        - "https://example.com/form"
+      - command: "fill"
+        args: ["e1", "user@example.com"]
+      - command: "fill"
+        args: ["e2", "password123"]
+      - command: "click"
+        args: ["e3"]
+      - command: "snapshot"
+  - name: Debug with DevTools
+    description: Open with headed mode for debugging
+    parameters:
+      command: "open"
+      args:
+        - "https://example.com"
+      headless: false
+      - command: "console"
+      - command: "requests"
+documentation:
+  readme: "README.md"
+maintainers:
+  - name: ARTEX Team
+    github: "jiwoochris/artex-global"
+status: stable
+permissions:
+  network: true
+  filesystem:
+    read: ["."]
+    write: [".playwright-cli/"]
+  process: true
+  privileged: false

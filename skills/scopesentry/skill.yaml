@@ -1,0 +1,139 @@
+name: scopesentry-mcp
+display_name:
+  en: ScopeSentry MCP
+  zh: ScopeSentry MCP 客戶端
+  ko: ScopeSentry MCP
+  es: ScopeSentry MCP
+  ja: ScopeSentry MCP
+description:
+  en: Manage ScopeSentry scanning platform (projects, tasks, templates, assets, nodes) via MCP
+  zh: 通過 MCP 管理 ScopeSentry 掃描平台 (專案、任務、模板、資產、節點)
+  ko: MCP를 통해 ScopeSentry 스캐닝 플랫폼 관리 (프로젝트, 작업, 템플릿, 자산, 노드)
+  es: Gestionar plataforma de escaneo ScopeSentry (proyectos, tareas, plantillas, activos, nodos) vía MCP
+  ja: MCP経由でScopeSentryスキャンプラットフォームを管理 (プロジェクト、タスク、テンプレート、資産、ノード)
+version: "1.0.0"
+category: utility
+author: ARTEX Team
+license: MIT
+tags:
+  - scopesentry
+  - mcp
+  - scanning
+  - vulnerability-management
+  - asset-management
+compatibility:
+  min_artex_version: "0.3.0"
+  platforms:
+    - linux
+    - darwin
+    - windows
+  architectures:
+    - amd64
+    - arm64
+dependencies:
+  system:
+    - name: curl
+      check_command: "curl --version"
+  # MCP client is built into ARTEX
+allowed_tools:
+  - "MCP(scopesentry:*)"
+parameters:
+  - name: mcp_url
+    type: string
+    label:
+      en: MCP Server URL
+      zh: MCP 服務器 URL
+    description:
+      en: ScopeSentry MCP endpoint (e.g., http://host:8082/mcp)
+      zh: ScopeSentry MCP 端點
+    required: true
+    validation:
+      pattern: "^https?://.+/mcp$"
+  - name: api_key
+    type: string
+    label:
+      en: API Key
+      zh: API 密鑰
+    description:
+      en: ScopeSentry API Key (ssk_...)
+      zh: ScopeSentry API 密鑰
+    required: true
+    secret: true
+  - name: timeout
+    type: number
+    label:
+      en: Request Timeout (seconds)
+      zh: 請求超時 (秒)
+    description:
+      en: MCP request timeout
+      zh: MCP 請求超時時間
+    required: false
+    default: 30
+    validation:
+      min: 5
+      max: 300
+entrypoint:
+  type: mcp
+  command: "scopesentry"
+  args:
+    - "--url={{.mcp_url}}"
+    - "--api-key={{.api_key}}"
+    - "--timeout={{.timeout}}"
+outputs:
+  - name: projects
+    type: json
+    description: Project list with ObjectIDs
+  - name: assets
+    type: json
+    description: Asset query results
+  - name: tasks
+    type: json
+    description: Scan task details
+  - name: templates
+    type: json
+    description: Scan templates
+  - name: nodes
+    type: json
+    description: Scanner nodes
+examples:
+  - name: List Projects
+    description: Get all projects grouped by tags
+    parameters:
+      mcp_url: "http://scopesentry:8082/mcp"
+      api_key: "ssk_xxxxx"
+  - name: Query Assets
+    description: Query assets with search and filter
+    parameters:
+      mcp_url: "http://scopesentry:8082/mcp"
+      api_key: "ssk_xxxxx"
+      # tool: list_assets
+      # arguments:
+      #   asset_type: "asset"
+      #   search: "domain=^example.com"
+      #   filter:
+      #     project: ["project-object-id"]
+  - name: Create Scan Task
+    description: Create a new scan task
+    parameters:
+      mcp_url: "http://scopesentry:8082/mcp"
+      api_key: "ssk_xxxxx"
+      # tool: create_scan_task
+      # arguments:
+      #   name: "example-subdomain"
+      #   node: ["node-1"]
+      #   template: "template-object-id"
+      #   targetSource: "general"
+      #   target: "example.com\nfoo.com"
+documentation:
+  readme: "SKILL.md"
+maintainers:
+  - name: ARTEX Team
+    github: "jiwoochris/artex-global"
+status: stable
+permissions:
+  network: true
+  filesystem:
+    read: []
+    write: []
+  process: false
+  privileged: false

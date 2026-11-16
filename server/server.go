@@ -998,6 +998,18 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/skills/{name}/files/{file...}", s.fsReadFile)
 	mux.HandleFunc("PUT /api/skills/{name}/files/{file...}", s.fsWriteFile)
 	mux.HandleFunc("DELETE /api/skills/{name}/files/{file...}", s.fsDeletePath)
+
+	// Skill YAML (skill.yaml schema)
+	mux.HandleFunc("GET /api/skills/yaml/schema", s.fsSkillYAMLSchema)
+	mux.HandleFunc("GET /api/skills/{name}/yaml", s.fsGetSkillYAML)
+	mux.HandleFunc("PUT /api/skills/{name}/yaml", s.fsPutSkillYAML)
+	mux.HandleFunc("POST /api/skills/validate", s.fsValidateSkillYAML)
+	mux.HandleFunc("GET /api/skills/{name}/info", s.fsGetSkillDirInfo)
+	// Kali Linux tools API
+	mux.HandleFunc("GET /api/kali/categories", s.kaliCategories)
+	mux.HandleFunc("GET /api/kali/tools", s.kaliTools)
+	mux.HandleFunc("GET /api/kali/stats", s.kaliStats)
+	mux.HandleFunc("POST /api/kali/tools/{name}/install", s.kaliToolInstall)
 	// MCP 资源侧可见性（更具体的 skill 路由会优先匹配）
 	mux.HandleFunc("GET /api/visibility/{kind}/{id}", s.pgResourceVisibility)
 	mux.HandleFunc("POST /api/visibility/toggle", s.pgToggleVisibility)

@@ -101,6 +101,10 @@ import type {
   TrafficHost,
   TrafficResp,
   UpdateCheck,
+  KaliCategoriesResponse,
+  KaliToolsResponse,
+  KaliToolInstallResponse,
+  KaliStatsResponse,
   UsageStats,
   WorkspaceFile,
   WorkspaceListing,
@@ -1196,6 +1200,24 @@ export const api = {
     get<{ calls: SkillCall[] }>(`/skills/${name}/usage?limit=${limit}`).then((r) => arr(r.calls)),
   missingSkills: (limit = 20) =>
     get<{ missing: MissingSkill[] }>(`/skills/missing?limit=${limit}`).then((r) => arr(r.missing)),
+
+  // ---- Skill YAML (skill.yaml schema) ----
+  skillYAMLSchema: () => get<{ schema: any }>("/skills/yaml/schema").then((r) => r.schema),
+  getSkillYAML: (name: string) => get<any>(`/skills/${name}/yaml`),
+  putSkillYAML: (name: string, yaml: any) => put<{ ok: boolean }>(`/skills/${name}/yaml`, yaml),
+  validateSkillYAML: (yaml: any) => post<{ valid: boolean; errors?: string[] }>("/skills/validate", yaml),
+  getSkillDirInfo: (name: string) => get<any>(`/skills/${name}/info`),
+
+  // ---- Kali Linux tools ----
+  kaliCategories: () =>
+    get<KaliCategoriesResponse>("/kali/categories").then((r) => r.categories),
+  kaliTools: (category?: string) =>
+    get<KaliToolsResponse>(
+      `/kali/tools${category ? `?category=${encodeURIComponent(category)}` : ""}`,
+    ).then((r) => r.tools),
+  kaliToolInstall: (name: string) =>
+    post<KaliToolInstallResponse>(`/kali/tools/${name}/install`, {}),
+  kaliStats: () => get<KaliStatsResponse>("/kali/stats").then((r) => r.stats),
 
   // ---- visibility (MCP resource side) ---- (agent ids are strings per spec)
   resourceVisibility: (kind: string, id: number) =>

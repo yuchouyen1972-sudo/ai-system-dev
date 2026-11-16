@@ -1194,16 +1194,117 @@ export interface MCPTool {
 // description covers both "what the skill does" and "when to use it".
 export interface SkillItem {
   name: string; // unique key = directory name
+  display_name?: I18nMap; // 多語言顯示名稱
   description?: string; // required per spec; covers what + when to use
+  description_i18n?: I18nMap; // 多語言描述
+  version?: string; // 語義化版本
+  category?: string; // 分類: recon | exploit | post-exploit | utility | custom
+  author?: string; // 作者
   license?: string; // optional: SPDX identifier or free text
   compatibility?: string; // optional: environment requirements
   mcps?: string[]; // MCP server names this skill unlocks on load
+  tags?: string[]; // 標籤
   files: string[]; // files in the skill directory
+  // skill.yaml fields
+  has_yaml?: boolean; // 是否有 skill.yaml
+  has_md?: boolean; // 是否有 SKILL.md
+  status?: string; // stable | beta | alpha | deprecated | archived
+  dependencies?: SkillDependencies; // 依賴關係
+  allowed_tools?: string[]; // 允許的工具
+  parameters?: SkillParameter[]; // 參數定義
+  entrypoint?: SkillEntrypoint; // 入口點
+  outputs?: SkillOutput[]; // 輸出定義
+  examples?: SkillExample[]; // 範例
+  maintainers?: SkillMaintainer[]; // 維護者
   // 调用统计（skill_usage 账本）。从未被调用过的 skill：calls=0、last_used 缺省。
   calls: number;
   tasks: number; // 加载过它的任务数（chat 会话不计入）
   usage_agents: string[]; // 加载过它的 agent key
   last_used?: string;
+}
+
+export interface I18nMap {
+  [lang: string]: string;
+}
+
+export interface SkillDependencies {
+  system?: SkillSystemDep[];
+  python?: SkillPythonDep[];
+  node?: SkillNodeDep[];
+  go?: SkillGoDep[];
+}
+
+export interface SkillSystemDep {
+  name: string;
+  version?: string;
+  check_command?: string;
+}
+
+export interface SkillPythonDep {
+  package: string;
+  version?: string;
+}
+
+export interface SkillNodeDep {
+  package: string;
+  version?: string;
+}
+
+export interface SkillGoDep {
+  module: string;
+  version?: string;
+}
+
+export interface SkillParameter {
+  name: string;
+  type: string; // string | number | boolean | array | object | file | secret
+  label?: I18nMap;
+  description?: I18nMap;
+  required?: boolean;
+  default?: any;
+  enum?: SkillEnumItem[];
+  validation?: SkillValidation;
+  secret?: boolean;
+}
+
+export interface SkillEnumItem {
+  value: string;
+  label?: I18nMap;
+}
+
+export interface SkillValidation {
+  pattern?: string;
+  min?: number;
+  max?: number;
+  min_length?: number;
+  max_length?: number;
+}
+
+export interface SkillEntrypoint {
+  type: string; // script | binary | docker | mcp
+  command: string;
+  args?: string[];
+  env?: Record<string, string>;
+  working_dir?: string;
+}
+
+export interface SkillOutput {
+  name: string;
+  type: string; // json | text | file | asset | finding
+  description?: string;
+  schema?: any;
+}
+
+export interface SkillExample {
+  name: string;
+  description?: string;
+  parameters?: Record<string, any>;
+}
+
+export interface SkillMaintainer {
+  name: string;
+  email?: string;
+  github?: string;
 }
 
 // SkillCall 是一次 Skill() 调用（单个 skill 的最近调用列表）。
@@ -1221,6 +1322,47 @@ export interface MissingSkill {
   calls: number;
   agents: string[];
   last_used?: string;
+}
+
+// ---- Kali Linux tools ----
+export interface KaliCategoryInfo {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+}
+
+export interface KaliCategoryStats {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+  call_count: number;
+  finding_count: number;
+}
+
+export interface KaliToolInfo {
+  name: string;
+  category: string;
+  description: string;
+  official_url: string;
+  skill_available: boolean;
+  skill_yaml_path?: string;
+}
+
+export interface KaliCategoriesResponse {
+  categories: KaliCategoryInfo[];
+}
+
+export interface KaliToolsResponse {
+  tools: KaliToolInfo[];
+}
+
+export interface KaliToolInstallResponse {
+  skill_path: string;
+  skill_yaml: any;
+}
+
+export interface KaliStatsResponse {
+  stats: KaliCategoryStats[];
 }
 
 // ---- Tools (内置工具目录) ----
