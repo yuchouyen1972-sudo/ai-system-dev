@@ -1365,6 +1365,88 @@ export interface KaliStatsResponse {
   stats: KaliCategoryStats[];
 }
 
+// ---- OpencodePentester tools ----
+export interface OpencodePentesterDomainInfo {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+}
+
+export interface OpencodePentesterDomainStats {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+  call_count: number;
+  finding_count: number;
+}
+
+export interface OpencodePentesterToolInfo {
+  name: string;
+  domain: string;
+  description: string;
+  official_url: string;
+  skill_available: boolean;
+  skill_yaml_path?: string;
+}
+
+export interface OpencodePentesterDomainsResponse {
+  domains: OpencodePentesterDomainInfo[];
+}
+
+export interface OpencodePentesterToolsResponse {
+  tools: OpencodePentesterToolInfo[];
+}
+
+export interface OpencodePentesterToolInstallResponse {
+  skill_path: string;
+  skill_yaml: any;
+}
+
+export interface OpencodePentesterStatsResponse {
+  stats: OpencodePentesterDomainStats[];
+}
+
+// ---- Shannon plugin tools ----
+export interface ShannonPhaseInfo {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+}
+
+export interface ShannonPhaseStats {
+  name: string;
+  tool_count: number;
+  skill_count: number;
+  call_count: number;
+  finding_count: number;
+}
+
+export interface ShannonToolInfo {
+  name: string;
+  phase: string;
+  description: string;
+  official_url: string;
+  skill_available: boolean;
+  skill_yaml_path?: string;
+}
+
+export interface ShannonDomainsResponse {
+  domains: ShannonPhaseInfo[];
+}
+
+export interface ShannonToolsResponse {
+  tools: ShannonToolInfo[];
+}
+
+export interface ShannonToolInstallResponse {
+  skill_path: string;
+  skill_yaml: any;
+}
+
+export interface ShannonStatsResponse {
+  stats: ShannonPhaseStats[];
+}
+
 // ---- Tools (内置工具目录) ----
 // key + handler live in Go; only these fields are page-editable. system tools lock
 // the key and the parameter *structure* (name/type/required) — the per-param

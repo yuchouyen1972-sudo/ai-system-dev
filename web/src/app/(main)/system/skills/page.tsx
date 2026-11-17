@@ -871,6 +871,18 @@ export default function SkillsPage() {
             Kali Tools Directory
           </Button>
         </Link>
+        <Link href="/system/opencode-pentester" passHref legacyBehavior>
+          <Button size="sm" variant="outline" className="ml-auto">
+            <PlayIcon className="size-3.5" />
+            opencode-pentester Tools Directory
+          </Button>
+        </Link>
+        <Link href="/system/shannon-plugin" passHref legacyBehavior>
+          <Button size="sm" variant="outline" className="ml-auto">
+            <PlayIcon className="size-3.5" />
+            Shannon Plugin Tools Directory
+          </Button>
+        </Link>
       </div>
       <div className="flex flex-1 overflow-hidden">
         {/* ── 左侧文件树 ── */}

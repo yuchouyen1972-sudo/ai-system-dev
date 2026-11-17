@@ -273,9 +273,30 @@ func ValidateSkillYAML(skill *SkillYAML) []string {
 		"impact":            true,
 		"forensics":         true,
 		"services":          true,
+		// opencode-pentester 16 attack domains
+		"scanning-analysis":   true,
+		"injection":           true,
+		"authentication-tokens": true,
+		"api-security":        true,
+		"web-applications":    true,
+		"client-side":         true,
+		"server-side":         true,
+		"cloud-containers":    true,
+		"system-post-exploitation": true,
+		"cve-exploit-research":  true,
+		"ai-llm-security":     true,
+		"secrets-sca-secrets": true,
+		"secrets-auth-middleware": true,
+		"secrets-access-control": true,
+		// opencode-shannon-plugin 6 pentest phases (recon already exists)
+		"vuln-discovery":     true,
+		"browser-testing":    true,
+		"idor-upload-testing": true,
+		"exploitation":       true,
+		"reporting":          true,
 	}
 	if skill.Category != "" && !validCategories[skill.Category] {
-		errors = append(errors, fmt.Sprintf("invalid category: %s (must be one of: recon, exploit, post-exploit, utility, custom)", skill.Category))
+		errors = append(errors, fmt.Sprintf("invalid category: %s (must be one of: recon, exploit, post-exploit, utility, custom, resource-dev, initial-access, persistence, priv-esc, defense-evasion, credential-access, discovery, lateral-movement, collection, c2, exfiltration, impact, forensics, services, scanning-analysis, injection, authentication-tokens, api-security, web-applications, client-side, server-side, cloud-containers, system-post-exploitation, cve-exploit-research, ai-llm-security, secrets-sca-secrets, secrets-auth-middleware, secrets-access-control, vuln-discovery, browser-testing, idor-upload-testing, exploitation, reporting)", skill.Category))
 	}
 
 	// Validate status

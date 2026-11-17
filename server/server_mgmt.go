@@ -1768,6 +1768,100 @@ func (s *Server) fsDeletePath(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"deleted": file})
 }
 
+// ---------- Skill YAML (skill.yaml schema) ----------
+
+// fsSkillYAMLSchema returns the JSON Schema for skill.yaml
+func (s *Server) fsSkillYAMLSchema(w http.ResponseWriter, r *http.Request) {
+	schema, err := GetSkillYAMLSchema()
+	if err != nil {
+		writeErr(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]any{"schema": schema})
+}
+
+// fsGetSkillYAML returns the parsed skill.yaml for a skill
+func (s *Server) fsGetSkillYAML(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if !validSkillName(name) {
+		writeErr(w, 400, "invalid skill name")
+		return
+	}
+	skillDir := filepath.Join(s.skillDir, name)
+	skill, err := LoadSkillYAML(skillDir)
+	if err != nil {
+		writeErr(w, 500, err.Error())
+		return
+	}
+	if skill == nil {
+		writeErr(w, 404, "skill.yaml not found")
+		return
+	}
+	writeJSON(w, 200, skill)
+}
+
+// fsPutSkillYAML writes/updates skill.yaml for a skill
+func (s *Server) fsPutSkillYAML(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if !validSkillName(name) {
+		writeErr(w, 400, "invalid skill name")
+		return
+	}
+	var skill SkillYAML
+	if err := decode(r, &skill); err != nil {
+		writeErr(w, 400, err.Error())
+		return
+	}
+	if skill.Name != name {
+		writeErr(w, 400, "skill name in body must match URL")
+		return
+	}
+	skillDir := filepath.Join(s.skillDir, name)
+	if _, err := os.Stat(skillDir); os.IsNotExist(err) {
+		writeErr(w, 404, "skill directory not found")
+		return
+	}
+	if err := WriteSkillYAML(skillDir, &skill); err != nil {
+		writeErr(w, 400, err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]any{"ok": true})
+}
+
+// fsValidateSkillYAML validates a skill.yaml without saving
+func (s *Server) fsValidateSkillYAML(w http.ResponseWriter, r *http.Request) {
+	var skill SkillYAML
+	if err := decode(r, &skill); err != nil {
+		writeErr(w, 400, err.Error())
+		return
+	}
+	errors := ValidateSkillYAML(&skill)
+	if len(errors) > 0 {
+		writeJSON(w, 400, map[string]any{"valid": false, "errors": errors})
+		return
+	}
+	writeJSON(w, 200, map[string]any{"valid": true})
+}
+
+// fsGetSkillDirInfo returns complete info about a skill directory
+func (s *Server) fsGetSkillDirInfo(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if !validSkillName(name) {
+		writeErr(w, 400, "invalid skill name")
+		return
+	}
+	info, err := GetSkillDirInfo(s.skillDir, name)
+	if err != nil {
+		writeErr(w, 500, err.Error())
+		return
+	}
+	if info == nil {
+		writeErr(w, 404, "skill not found")
+		return
+	}
+	writeJSON(w, 200, info)
+}
+
 // ---------- skill visibility ----------
 
 func (s *Server) pgSkillVisibility(w http.ResponseWriter, r *http.Request) {

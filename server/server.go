@@ -1010,6 +1010,16 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /api/kali/tools", s.kaliTools)
 	mux.HandleFunc("GET /api/kali/stats", s.kaliStats)
 	mux.HandleFunc("POST /api/kali/tools/{name}/install", s.kaliToolInstall)
+	// opencode-pentester tools API
+	mux.HandleFunc("GET /api/opencode-pentester/domains", s.opencodePentesterDomains)
+	mux.HandleFunc("GET /api/opencode-pentester/tools", s.opencodePentesterTools)
+	mux.HandleFunc("GET /api/opencode-pentester/stats", s.opencodePentesterStats)
+	mux.HandleFunc("POST /api/opencode-pentester/tools/{name}/install", s.opencodePentesterToolInstall)
+	// Shannon plugin tools API
+	mux.HandleFunc("GET /api/shannon-phases", s.shannonPhases)
+	mux.HandleFunc("GET /api/shannon-tools", s.shannonTools)
+	mux.HandleFunc("GET /api/shannon-stats", s.shannonStats)
+	mux.HandleFunc("POST /api/shannon-tools/{name}/install", s.shannonToolInstall)
 	// MCP 资源侧可见性（更具体的 skill 路由会优先匹配）
 	mux.HandleFunc("GET /api/visibility/{kind}/{id}", s.pgResourceVisibility)
 	mux.HandleFunc("POST /api/visibility/toggle", s.pgToggleVisibility)

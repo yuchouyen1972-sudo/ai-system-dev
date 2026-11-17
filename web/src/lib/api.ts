@@ -105,6 +105,14 @@ import type {
   KaliToolsResponse,
   KaliToolInstallResponse,
   KaliStatsResponse,
+  OpencodePentesterDomainsResponse,
+  OpencodePentesterToolsResponse,
+  OpencodePentesterToolInstallResponse,
+  OpencodePentesterStatsResponse,
+  ShannonDomainsResponse,
+  ShannonToolsResponse,
+  ShannonToolInstallResponse,
+  ShannonStatsResponse,
   UsageStats,
   WorkspaceFile,
   WorkspaceListing,
@@ -1218,6 +1226,37 @@ export const api = {
   kaliToolInstall: (name: string) =>
     post<KaliToolInstallResponse>(`/kali/tools/${name}/install`, {}),
   kaliStats: () => get<KaliStatsResponse>("/kali/stats").then((r) => r.stats),
+
+  // ---- OpencodePentester tools ----
+  opencodePentesterDomains: () =>
+    get<OpencodePentesterDomainsResponse>("/opencode-pentester/domains").then(
+      (r) => r.domains
+    ),
+  opencodePentesterTools: (domain?: string) =>
+    get<OpencodePentesterToolsResponse>(
+      `/opencode-pentester/tools${domain ? `?domain=${encodeURIComponent(domain)}` : ""}`
+    ).then((r) => r.tools),
+  opencodePentesterToolInstall: (name: string) =>
+    post<OpencodePentesterToolInstallResponse>(
+      `/opencode-pentester/tools/${name}/install`,
+      {}
+    ),
+  opencodePentesterStats: () =>
+    get<OpencodePentesterStatsResponse>("/opencode-pentester/stats").then(
+      (r) => r.stats
+    ),
+
+  // ---- Shannon plugin tools ----
+  shannonPhases: () =>
+    get<ShannonDomainsResponse>("/shannon-phases").then((r) => r.domains),
+  shannonTools: (phase?: string) =>
+    get<ShannonToolsResponse>(
+      `/shannon-tools${phase ? `?phase=${encodeURIComponent(phase)}` : ""}`
+    ).then((r) => r.tools),
+  shannonToolInstall: (name: string) =>
+    post<ShannonToolInstallResponse>(`/shannon-tools/${name}/install`, {}),
+  shannonStats: () =>
+    get<ShannonStatsResponse>("/shannon-stats").then((r) => r.stats),
 
   // ---- visibility (MCP resource side) ---- (agent ids are strings per spec)
   resourceVisibility: (kind: string, id: number) =>

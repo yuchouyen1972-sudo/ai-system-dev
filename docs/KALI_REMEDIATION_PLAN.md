@@ -236,7 +236,7 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T11 → T12 → T13 → 
 | T13 (converge 後置) | 已完成 | 22:55 | 23:00 | ~5 | Phase 7 已 append，T022/T024/T025/T026 已實作 |
 | T14 (Docker Compose) | ⚠️ 環境限制 | 00:05 | | | `docker compose config` 通過；實際 up 需 Docker daemon，本機未啟動 |
 | T15 (報告＋交付) | 已完成 | 00:05 | 00:15 | ~10 | docs/KALI_ARTEX_SEC_TESTING_GAP.md 已落盤 |
-| T16 (git commit/push) | ⏳ 待 remote URL | | | | 本地未 commit，需提供 remote URL |
+| T16 (git commit/push) | ⚠️ commit 成功，push 失敗 | 23:20 | 23:25 | ~5 | commit d6f9ce1 (51 files)；push 403 權限不足，remote origin=jiwoochris/artex-global 不允許 yuchouyen1972-sudo 推送 |
 
 ---
 
@@ -278,3 +278,94 @@ T1 → T2 → T3 → T4 → T5 → T6 → T7 → T8 → T11 → T12 → T13 → 
 5. 提供 remote URL 後執行 `git remote add origin <url>` 並 `git push -u origin master`
 6. 執行 `/speckit.converge` 最終收斂驗證（Phase 7 T023 Docker 子項需環境）
 7. 另開 Spec Kit 規格層工作，針對 KALI_ARTEX_SEC_TESTING_GAP.md 第 5 節列出的 9 個缺類別（特別是 P1 的 Initial Access、Credential Access、Privilege Escalation）
+
+---
+
+## 7. opencode-pentester 整合工作計畫（2026-11-17 新增）
+
+### 規格層（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 |
+|---------|------|------|------|
+| S1 | `/speckit.specify` 撰寫 SDD 規格 | ✅ 已完成 | `specs/002-opencode-pentester-integration/spec.md` |
+| S2 | `/speckit.plan` 撰寫執行計畫 | ✅ 已完成 | `specs/002-opencode-pentester-integration/plan.md` |
+| S3 | `/speckit.tasks` 產出細項任務 | ✅ 已完成 | `specs/002-opencode-pentester-integration/tasks.md` |
+| S4 | `/speckit.checklist` 品質檢查表 | ✅ 已完成 | `specs/002-opencode-pentester-integration/checklists/requirements.md` |
+
+### 後端 Go 實作（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 驗收 |
+|---------|------|------|------|------|
+| B1 | skill_yaml.go 擴充 16 個 opencode-pentester 域白名單 | ✅ 已完成 | `server/skill_yaml.go` | go build/vet 通過 |
+| B2 | 新增 `server/opencode_pentester.go` | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| B3 | 新增 12 個代理映射 `OpencodePentesterAgent` | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| B4 | 新增 `GetOpencodePentesterStats` 函數 | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| B5 | 註冊 `GET/POST /api/opencode-pentester/*` 四個端點 | ✅ 已完成 | `server/server.go` | go build/vet 通過 |
+| B6 | Go 單元測試 `opencode_pentester_test.go` | ✅ 已完成 | `server/opencode_pentester_test.go` | 4/4 測試通過 |
+
+### 前端 Next.js 實作（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 驗收 |
+|---------|------|------|------|------|
+| F1 | Kali 工具目錄頁 | ✅ 已完成 | `web/src/app/(main)/system/kali/page.tsx` | npm run build 通過 |
+| F2 | Kali 分類儀表板頁 | ✅ 已完成 | `web/src/app/(main)/system/kali-dashboard/page.tsx` | npm run build 通過 |
+| F3 | 技能頁 Kali 連結 | ✅ 已完成 | `web/src/app/(main)/system/skills/page.tsx` | npm run build 通過 |
+| F4 | API 客戶端 `kaliCategories/kaliTools/kaliToolInstall/kaliStats` | ✅ 已完成 | `web/src/lib/api.ts` | npm run build 通過 |
+| F5 | 型別定義 `KaliCategoryInfo/KaliToolInfo` 等 | ✅ 已完成 | `web/src/lib/types.ts` | npm run build 通過 |
+
+### opencode-pentester 整合（進行中）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 備註 |
+|---------|------|------|------|------|
+| O1 | opencode-pentester 工具目錄頁 | ✅ 已完成 | `web/src/app/(main)/system/opencode-pentester/page.tsx` | npm run build 通過 |
+| O2 | opencode-pentester 分類儀表板頁 | ✅ 已完成 | `web/src/app/(main)/system/opencode-pentester-dashboard/page.tsx` | npm run build 通過 |
+| O3 | 技能頁 opencode-pentester 連結 | ✅ 已完成 | `web/src/app/(main)/system/skills/page.tsx` | npm run build 通過 |
+| O4 | API 客戶端 `opencodePentesterDomains/Tools/ToolInstall/Stats` | ✅ 已完成 | `web/src/lib/api.ts` | npm run build 通過 |
+| O5 | 型別定義 `OpencodePentesterDomainInfo/ToolInfo` 等 | ✅ 已完成 | `web/src/lib/types.ts` | npm run build 通過 |
+| O6 | 後端 `opencode_pentester.go` 資料結構＋75 工具清單 | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| O7 | 後端 12 個代理映射 `OpencodePentesterAgent` | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| O8 | 後端 `GetOpencodePentesterStats` 函數 | ✅ 已完成 | `server/opencode_pentester.go` | go build/vet 通過 |
+| O9 | 後端 `/api/opencode-pentester/*` 四個端點 | ✅ 已完成 | `server/server.go` | go build/vet 通過 |
+| O10 | Go 單元測試 `opencode_pentester_test.go` | ✅ 已完成 | `server/opencode_pentester_test.go` | 4/4 測試通過 |
+| O11 | Docker Compose 部署驗證 | ⚠️ 環境限制 | `docker-compose.local.yml` | 需 Linux/Docker 主機 |
+| O12 | `/speckit.converge` 最終收斂驗證 | ⏳ 待執行 | `specs/002-opencode-pentester-integration/` | 需執行 specify converge |
+
+---
+
+## 8. opencode-shannon-plugin 整合工作計畫（2026-11-17 新增）
+
+### 規格層（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 |
+|---------|------|------|------|
+| S1 | `/speckit.specify` 撰寫 SDD 規格 | ✅ 已完成 | `specs/003-opencode-shannon-plugin/spec.md` |
+| S2 | `/speckit.plan` 撰寫執行計畫 | ✅ 已完成 | `specs/003-opencode-shannon-plugin/plan.md` |
+| S3 | `/speckit.tasks` 產出細項任務 | ✅ 已完成 | `specs/003-opencode-shannon-plugin/tasks.md` |
+| S4 | `/speckit.checklist` 品質檢查表 | ✅ 已完成 | `specs/003-opencode-shannon-plugin/checklists/requirements.md` |
+
+### 後端 Go 實作（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 驗收 |
+|---------|------|------|------|------|
+| B1 | skill_yaml.go 擴充 6 個 Shannon 階段白名單 | ✅ 已完成 | `server/skill_yaml.go` | go build/vet 通過 |
+| B2 | 新增 `server/shannon_plugin.go` | ✅ 已完成 | `server/shannon_plugin.go` | go build/vet 通過 |
+| B3 | 新增 6 個 Shannon 階段、約 60 工具清單 | ✅ 已完成 | `server/shannon_plugin.go` | go build/vet 通過 |
+| B4 | 新增 `GetShannonPhases`/`GetShannonTools`/`GetShannonStats` 函數 | ✅ 已完成 | `server/shannon_plugin.go` | go build/vet 通過 |
+| B5 | 新增 12 個代理映射 `ShannonAgent` | ✅ 已完成 | `server/shannon_plugin.go` | go build/vet 通過 |
+| B6 | 註冊 `GET/POST /api/shannon-*` 四個端點 | ✅ 已完成 | `server/server.go` | go build/vet 通過 |
+| B7 | Go 單元測試 `shannon_plugin_test.go` | ✅ 已完成 | `server/shannon_plugin_test.go` | 4/4 測試通過 |
+
+### 前端 Next.js 實作（已完成）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 驗收 |
+|---------|------|------|------|------|
+| F1 | Shannon 工具目錄頁 | ✅ 已完成 | `web/src/app/(main)/system/shannon-plugin/page.tsx` | npm run build 通過 |
+| F2 | Shannon 分類儀表板頁 | ✅ 已完成 | `web/src/app/(main)/system/shannon-plugin-dashboard/page.tsx` | npm run build 通過 |
+| F3 | 技能頁 Shannon 連結 | ✅ 已完成 | `web/src/app/(main)/system/skills/page.tsx` | npm run build 通過 |
+| F4 | API 客戶端 `shannonPhases/shannonTools/shannonToolInstall/shannonStats` | ✅ 已完成 | `web/src/lib/api.ts` | npm run build 通過 |
+| F5 | 型別定義 `ShannonPhaseInfo/ShannonToolInfo` 等 | ✅ 已完成 | `web/src/lib/types.ts` | npm run build 通過 |
+
+### 驗證與收斂（進行中）
+| 工作 ID | 名稱 | 狀態 | 檔案 | 備註 |
+|---------|------|------|------|------|
+| V1 | `go build` / `go vet` | ✅ 已完成 | `server/...` | 全通過 |
+| V2 | `go test -run TestShannon` | ✅ 已完成 | `server/...` | 4/4 測試通過 |
+| V3 | `npm run build` | ✅ 已完成 | `web/` | TypeScript 無錯誤 |
+| V4 | `/speckit.converge` 最終收斂驗證 | ✅ 已完成 | `specs/003-opencode-shannon-plugin/tasks.md` | Phase 7 Convergence 已 append 10 個發現 (T025-T034) |
+| V5 | Docker Compose 部署驗證 | ⚠️ 環境限制 | `docker-compose.local.yml` | 需 Linux/Docker 主機 |
+| V6 | Git commit/push | ✅ 已完成 | `git commit d6f9ce1` + `git push` | 已推送至 https://github.com/yuchouyen1972-sudo/ai-system-dev.git (main) |
+
+---
