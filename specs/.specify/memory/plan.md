@@ -1,41 +1,43 @@
-# Implementation Plan: TMF 參數配置驗證
+# Implementation Plan: tmf_1m_addons 偵測器整合進 tmf_1m_engine 即時 TICK 引擎
 
-**Branch**: `[001-tmf-config-validation]` | **Date**: 2026-11-13 | **Spec**: `specs/.specify/memory/spec.md`
+**Branch**: `[003-addon-detectors-integration]` | **Date**: 2026-11-17 | **Spec**: `specs/.specify/memory/spec.md`
 
-**Input**: Feature specification from `specs/.specify/memory/spec.md`
+**Input**: Feature specification from `specs/003-addon-detectors-integration/spec.md`
 
 ## Summary
 
-為 tmf_engine.py 新增 `validate_config(spec, account)` 純函數，回傳結構化驗證報告 (valid/warnings/errors/checks)，並在 TMFDecisionEngine.__init__ 時自動執行並附於 `engine.config_validation`。驗證項目包含保證金足夠、風險比例上限、停損範圍、tick_value 非零、peak_equity 異常等。
+將 tmf_1m_addons.py 的 12 個偵測器與共振過濾層整合進 tmf_1m_engine.py 即時 TICK 引擎，作為進場 OR 條件與進場前過濾層，不改變 TICK socket 監聽與 K 線彙總功能。
 
 ## Technical Context
 
 **Language/Version**: Python 3.11
 
-**Primary Dependencies**: Python stdlib dataclasses, typing (tmf_engine 已有 numpy/pandas，但驗證函數僅需 stdlib)
+**Primary Dependencies**: numpy, pandas, scipy.signal.argrelextrema (現行 tmf_1m_engine.py 已有)，tmf_1m_addons.py（新增偵測器模組）
 
-**Storage**: N/A (純記憶體驗證，不寫檔)
+**Storage**: N/A (純記憶體偵測，不寫檔)
 
-**Testing**: pytest（現行四件套）
+**Testing**: 單元測試 + 全量回測 (TMF_1m.parquet)
 
 **Target Platform**: Linux server / Windows dev machine
 
-**Project Type**: library (tmf_engine.py 作為模組被匯入)
+**Project Type**: library + script (tmf_1m_engine.py 作為模組被匯入，亦可直接執行回測)
 
-**Performance Goals**: 驗證函數執行 < 1ms
+**Performance Goals**: 每根 K 線偵測時間 < 50ms，不影響即時交易延遲
 
-**Constraints**: 不修改現有 TMFSpec / Account 欄位定義；不破壞現有 `python tmf_engine.py` 主程式行為
+**Constraints**: 不修改現有 KD(14,3,3)、MACD(8,34,9)、VR(34)+OBV 進場邏輯；不修改 TICK socket 監聽與 K 線彙總功能；新增功能採 OR 關係，不減少現有交易
 
-**Scale/Scope**: 單一檔案 tmf_engine.py 新增約 30-40 行程式碼，單一測試檔案
+**Scale/Scope**: 
+- tmf_1m_engine.py 新增約 80-100 行程式碼（導入、偵測器實例化、OR 條件、over濾層呼叫）
+- tmf_1m_addons.py 已存在（12 個偵測器 + check_resonance）
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - 規格優先：✅ 已有 spec.md
-- 可維護性：✅ 函數名稱明確、欄位結構化、有 docstring
-- 測試優先：✅ 將建立對應單元測試
-- 安全與隱私：✅ 不涉及憑證、不寫檔、不外送
+- 可維護性：✅ 偵測器類別獨立、職責單一、有 docstring
+- 測試優先：✅ 將建立對應單元測試與全量回測驗證
+- 安全與隱私：✅ 不涉及憑證、不寫檔、不外送、不修改現有進場邏輯
 - SDD 流程遵守：✅ constitution → specify → plan → tasks → implement → converge
 
 ## Project Structure
@@ -43,20 +45,24 @@
 ### Documentation (this feature)
 
 ```text
-specs/.specify/memory/
+specs/003-addon-detectors-integration/
 ├── spec.md              # 規格 (已建立)
 ├── plan.md              # 計畫 (本檔)
 └── tasks.md             # 任務清單 (下一步)
+specs/.specify/memory/
+├── spec.md              # 規格副本 (指向本 spec)
+├── plan.md              # 計畫副本 (指向本 plan)
+└── tasks.md             # 任務清單副本 (指向本 tasks)
 ```
 
 ### Source Code (repository root)
 
 ```text
-tmf_engine.py            # 新增 validate_config 函數 + TMFDecisionEngine.__init__ 整合
-tests/test_config_validation.py   # 新增單元測試 (四件套驗證)
+C:\Users\yp86n\AppData\Local\mtxf-local\scripts\tmf_1m_engine.py    # 新增 12 個偵測器整合 + check_resonance 過濾層
+C:\Users\yp86n\AppData\Local\mtxf-local\scripts\tmf_1m_addons.py    # 已存在 12 個偵測器 + check_resonance
 ```
 
-**Structure Decision**: 單一專案結構，驗證函數直接加入 tmf_engine.py，測試放在根目錄 tests/。
+**Structure Decision**: 單一專案結構，偵測器邏輯在 tmf_1m_addons.py，整合邏輯在 tmf_1m_engine.py，測試透過全量回測驗證。
 
 ## Complexity Tracking
 
