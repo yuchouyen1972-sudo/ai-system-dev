@@ -1,7 +1,7 @@
 # AI 工廠持續計畫（進度唯一真相來源）
 
-> 更新：2026-11-13
-> 狀態：Spec Kit 與現有開發流程相互整合優化已完成
+> 更新：2026-11-21 18:01
+> 狀態：SDD 收斂已完成（Converged），等待使用者提供下一個任務或 remote URL
 
 ## 已完成
 
@@ -12,12 +12,14 @@
 - `.gitignore` 已建立，排除 `.opencode/`、*.pkl、*.csv、*.log 等
 - 整合範本：TMF 參數配置驗證（spec/plan/tasks 三文件、validate_config 加入 tmf_engine.py、tests/test_config_validation.py 7 passed）
 - git commit 已完成：cb623a6 feat(spec-kit): integrate SDD specification layer with existing dev workflow
+- git commit 已完成：370b475 chore(spec-kit): converge SDD memory files for 003-addon-detectors-integration（3 spec memory 檔從 001 更新為 003 版本）
+- /speckit.converge 已完成（Converged）：specs/.specify/memory/{plan,spec,tasks}.md 三文件已 commit 且內容一致
 - git push：未執行（本地無 remote 儲存庫，待使用者提供 remote URL）
 
 ## 下一個待辦
 
-- 使用者在 OpenCode 對話中執行 `/speckit.converge` 完成 SDD 收斂驗證（Converged）
 - 如需 push 至遠端，請提供 remote URL 並執行 `git remote add origin <url>` 後 `git push -u origin master`
+- 等待使用者提供下一個開發任務（SDD 規格層已收斂，可進入 ai-dev-team / ai-software-factory 管線實作）
 
 ## 相依關係
 
