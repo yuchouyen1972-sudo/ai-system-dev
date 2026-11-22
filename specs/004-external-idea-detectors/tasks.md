@@ -120,3 +120,11 @@
 ### Notes
 - 每完成一任務或邏輯組即 commit（mtxf-system repo；specs 勾選狀態同步 Default Project repo）
 - 所有終端輸出 UTF-8（`io.TextIOWrapper` 樣式）；不建立任何網頁產物
+
+---
+
+## Phase 7: Convergence（2026-11-22 converge 產出）
+
+**Purpose**: 收斂盤點 11 FR＋6 SC＋10 AC＋8 研究決策＋5 憲法原則——9/10 AC 過關，餘 1 項 US3 互動驗證 partial
+
+- [ ] T014 [US3] 補 US3 疊圖互動自動化驗證：①offscreen 下三開關（KZ/FVG/掃蕩）`setChecked` 切換後 plot items 正確增減且不影響既有圖層（per US3/AC1-2，partial）②paint 含疊圖之單幀耗時抽樣（per US3/AC3「無可感知延遲」量化佐證，partial）③執行 quickstart.md §3 人工步驟並留檔輸出（per plan: 2971-2979 掛接決策）
