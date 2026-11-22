@@ -4,7 +4,7 @@
 
 **Prerequisites**: plan.md ✓、spec.md ✓、research.md ✓（D1~D8）、data-model.md ✓、contracts/（略——內部工具）
 
-**狀態**：T001~T013 全數完成（2026-11-22）；converge 待執行
+**狀態**：T001~T014 全數完成；converge 二輪＝**converged**（2026-11-22，F1/US3 已解）
 
 **Tests**: 憲法「測試優先」明文要求——本清單含測試任務，且**測試任務先於實作任務**（先 FAIL 後 PASS）。
 
@@ -127,4 +127,4 @@
 
 **Purpose**: 收斂盤點 11 FR＋6 SC＋10 AC＋8 研究決策＋5 憲法原則——9/10 AC 過關，餘 1 項 US3 互動驗證 partial
 
-- [ ] T014 [US3] 補 US3 疊圖互動自動化驗證：①offscreen 下三開關（KZ/FVG/掃蕩）`setChecked` 切換後 plot items 正確增減且不影響既有圖層（per US3/AC1-2，partial）②paint 含疊圖之單幀耗時抽樣（per US3/AC3「無可感知延遲」量化佐證，partial）③執行 quickstart.md §3 人工步驟並留檔輸出（per plan: 2971-2979 掛接決策）
+- [x] T014 [US3] 補 US3 疊圖互動自動化驗證：①offscreen 下三開關（KZ/FVG/掃蕩）`setChecked` 切換後 plot items 正確增減且不影響既有圖層（per US3/AC1-2，partial）②paint 含疊圖之單幀耗時抽樣（per US3/AC3「無可感知延遲」量化佐證，partial）③執行 quickstart.md §3 人工步驟並留檔輸出（per plan: 2971-2979 掛接決策）
